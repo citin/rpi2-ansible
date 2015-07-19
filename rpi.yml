@@ -1,0 +1,70 @@
+---
+- hosts: all
+  remote_user: pi
+  sudo: true
+
+  tasks:
+  - name: Install basic packages
+    apt: pkg={{ item }} state=latest update_cache=yes install_recommends=yes
+    with_items:
+      - python-software-properties
+      - tmux
+      - vim
+      - mplayer
+      - git
+      - apt-transport-https
+      - htop
+      - zsh
+      - samba
+      - transmission-cli
+      - transmission-daemon
+
+  - name: Clone my dotfiles
+    git: repo=https://github.com/citin/dotfiles.git dest=/home/pi/dotfiles
+    
+  - name: Clone ohmzsh and install
+    git: repo=https://github.com/robbyrussell/oh-my-zsh.git dest=/home/pi/.oh-my-zsh
+
+  - name: Set proper owner to dotfiles
+    file:
+      path=/home/pi/dotfiles
+      owner=pi
+      group=pi
+      recurse=yes
+
+  - name: Symlink dotfiles
+    file:
+      path=/home/pi/{{ item }}
+      src=/home/pi/dotfiles/{{ item }}
+      state=link
+      force=yes
+      owner=pi
+      group=pi
+
+    with_items:
+      - .zshrc
+      - .tmux.conf
+
+  - name: Change to zsh
+    user: name=pi shell=/bin/zsh
+
+  - name: Fix audio dither
+    lineinfile: dest=/boot/config.txt state=present line=disable_audio_dither=1
+
+  - name: Add apt key for plexmediaserver repo
+    apt_key: url=https://dev2day.de/pms/dev2day-pms.gpg.key state=present
+
+  - name: Add plexmediaserver repo
+    apt_repository: repo='deb https://dev2day.de/pms/ wheezy main' state=present
+
+  - apt: pkg=plexmediaserver state=latest
+
+  - name: Transmission WEB client 
+    copy: 
+      src=/Users/xito/rpi_ansible/settings.json 
+      dest=/etc/transmission-daemon 
+      owner=pi 
+      group=pi 
+      mode="u=rw,g=rw,o=rw" 
+      force=yes
+
