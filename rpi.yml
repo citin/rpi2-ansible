@@ -18,6 +18,7 @@
       - samba
       - transmission-cli
       - transmission-daemon
+      - wakeonlan
 
   - name: Clone my dotfiles
     git: repo=https://github.com/citin/dotfiles.git dest=/home/pi/dotfiles
