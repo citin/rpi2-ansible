@@ -16,6 +16,7 @@
       - htop
       - zsh
       - samba
+      - samba-tools
       - transmission-cli
       - transmission-daemon
       - wakeonlan
@@ -68,4 +69,14 @@
       group=pi 
       mode="u=rw,g=rw,o=rw" 
       force=yes
+ 
+  - name: Add apt key for Kodi repo
+    apt_key: keyserver=keyserver.ubuntu.com id=5243CDED
 
+  - name: Add Kodi repo
+    apt_repository: repo='deb http://archive.mene.za.net/raspbian wheezy contrib' state=present
+
+  - name: Create group input
+    group: name=input state=present
+ 
+  - apt: pkg=kodi state=latest
